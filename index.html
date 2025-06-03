@@ -1,75 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Pacientes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro de Pacientes en Emergencias</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-light">
+<body>
+    <div class="container-fluid">
+        <header class="bg-primary text-white text-center py-3 mb-4 d-flex align-items-center justify-content-between">
+            <h1 class="display-6 m-0 ms-3">Sistema de Registro de Pacientes en Emergencias</h1>
+            <button class="btn btn-danger me-3" id="btnLogout">Cerrar Sesión</button>
+        </header>
 
-  <div class="container mt-4">
-    <h1 class="text-center text-primary">📋 Registro de Pacientes - Emergencias</h1>
+        <main class="container">
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="true">Registro de Pacientes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab" aria-controls="lista" aria-selected="false">Lista de Pacientes</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="estadisticas-tab" data-bs-toggle="tab" data-bs-target="#estadisticas" type="button" role="tab" aria-controls="estadisticas" aria-selected="false">Estadísticas</button>
+                </li>
+            </ul>
 
-    <form id="formularioPaciente" class="mt-4">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Nombre Completo</label>
-          <input type="text" class="form-control" id="nombre" required />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Edad</label>
-          <input type="number" class="form-control" id="edad" required />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Género</label>
-          <select class="form-select" id="genero">
-            <option>Hombre</option>
-            <option>Mujer</option>
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Documento (CI o Pasaporte)</label>
-          <input type="text" class="form-control" id="documento" required />
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Síntomas</label>
-          <input type="text" class="form-control" id="sintomas" required />
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Gravedad</label>
-          <select class="form-select" id="gravedad">
-            <option value="leve">🟩 Leve</option>
-            <option value="moderado">🟨 Moderado</option>
-            <option value="urgente">🟧 Urgente</option>
-            <option value="critico">🟥 Crítico</option>
-          </select>
-        </div>
-      </div>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="registro" role="tabpanel" aria-labelledby="registro-tab">
+                    <h2 class="mb-3">Registrar Nuevo Paciente</h2>
+                    <div class="row">
+                        <div class="col-12"> 
+                            <form id="pacienteForm" class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="nombre" class="form-label">Nombre completo</label>
+                                    <input type="text" class="form-control" id="nombre" required>
+                                    <div class="invalid-feedback">Por favor, ingrese el nombre completo.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="edad" class="form-label">Edad</label>
+                                    <input type="number" class="form-control" id="edad" required min="1">
+                                    <div class="invalid-feedback">La edad debe ser un número mayor a 0.</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="genero" class="form-label">Género</label>
+                                    <select class="form-select" id="genero" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Hombre">Hombre</option>
+                                        <option value="Mujer">Mujer</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, seleccione el género.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="documento" class="form-label">Documento de identidad (CI/Pasaporte)</label>
+                                    <input type="text" class="form-control" id="documento" required minlength="5">
+                                    <div class="invalid-feedback">El documento debe tener al menos 5 caracteres.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="sintomas" class="form-label">Síntomas</label>
+                                    <textarea class="form-control" id="sintomas" rows="3" required></textarea>
+                                    <div class="invalid-feedback">Por favor, describa los síntomas.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="gravedad" class="form-label">Nivel de Gravedad</label>
+                                    <select class="form-select" id="gravedad" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="leve">🟩 Leve</option>
+                                        <option value="moderado">🟨 Moderado</option>
+                                        <option value="urgente">🟧 Urgente</option>
+                                        <option value="critico">🟥 Crítico</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, seleccione el nivel de gravedad.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="tratamiento" class="form-label">Tratamiento</label>
+                                    <input type="text" class="form-control" id="tratamiento" required>
+                                    <div class="invalid-feedback">Por favor, ingrese el tratamiento.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="medicamentos" class="form-label">Medicamentos</label>
+                                    <input type="text" class="form-control" id="medicamentos" required>
+                                    <div class="invalid-feedback">Por favor, ingrese los medicamentos.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="examenes" class="form-label">Exámenes</label>
+                                    <select class="form-select" id="examenes" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Hemograma">Hemograma</option>
+                                        <option value="Radiografía">Radiografía</option>
+                                        <option value="Tomografía">Tomografía</option>
+                                        <option value="Orina">Orina</option>
+                                        <option value="Ninguno">Ninguno</option>
+                                    </select>
+                                    <div class="invalid-feedback">Por favor, seleccione los exámenes.</div>
+                                </div>
 
-      <button type="submit" class="btn btn-success mt-3">Registrar Paciente</button>
-    </form>
+                                <div class="col-12 text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg me-2">Registrar Paciente</button>
+                                    <button type="reset" class="btn btn-secondary btn-lg">Limpiar Formulario</button>
+                                </div>
+                            </form>
+                        </div>
+                        </div>
+                </div>
 
-    <hr class="my-4" />
+                <div class="tab-pane fade" id="lista" role="tabpanel" aria-labelledby="lista-tab">
+                    <h2 class="mb-3">Pacientes Registrados</h2>
+                    <div class="d-flex flex-wrap justify-content-center mb-3">
+                        <span class="badge bg-danger fs-6 me-2 mb-2 p-2">Críticos: <span id="countCritico">0</span></span>
+                        <span class="badge bg-warning fs-6 me-2 mb-2 p-2">Urgentes: <span id="countUrgente">0</span></span>
+                        <span class="badge bg-info fs-6 me-2 mb-2 p-2">Moderados: <span id="countModerado">0</span></span>
+                        <span class="badge bg-success fs-6 me-2 mb-2 p-2">Leves: <span id="countLeve">0</span></span>
+                    </div>
 
-    <h2 class="text-center">📑 Lista de Pacientes</h2>
-    <table class="table table-bordered mt-3">
-      <thead class="table-dark">
-        <tr>
-          <th>Nombre</th>
-          <th>Edad</th>
-          <th>Género</th>
-          <th>Documento</th>
-          <th>Síntomas</th>
-          <th>Gravedad</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody id="tablaPacientes"></tbody>
-    </table>
-  </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Edad</th>
+                                    <th>Género</th>
+                                    <th>Documento</th>
+                                    <th>Síntomas</th>
+                                    <th>Gravedad</th>
+                                    <th>Tratamiento</th>
+                                    <th>Medicamentos</th>
+                                    <th>Exámenes</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPacientesBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
 
-  <script src="script.js"></script>
+                <div class="tab-pane fade" id="estadisticas" role="tabpanel" aria-labelledby="estadisticas-tab">
+                    <h2 class="mb-3">Estadísticas de Pacientes</h2>
+                    <p>Aquí podrías añadir gráficos o visualizaciones de los datos de los pacientes.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
