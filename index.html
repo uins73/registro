@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Pacientes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-light">
+
+  <div class="container mt-4">
+    <h1 class="text-center text-primary">📋 Registro de Pacientes - Emergencias</h1>
+
+    <form id="formularioPaciente" class="mt-4">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nombre Completo</label>
+          <input type="text" class="form-control" id="nombre" required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Edad</label>
+          <input type="number" class="form-control" id="edad" required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Género</label>
+          <select class="form-select" id="genero">
+            <option>Hombre</option>
+            <option>Mujer</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Documento (CI o Pasaporte)</label>
+          <input type="text" class="form-control" id="documento" required />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Síntomas</label>
+          <input type="text" class="form-control" id="sintomas" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Gravedad</label>
+          <select class="form-select" id="gravedad">
+            <option value="leve">🟩 Leve</option>
+            <option value="moderado">🟨 Moderado</option>
+            <option value="urgente">🟧 Urgente</option>
+            <option value="critico">🟥 Crítico</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success mt-3">Registrar Paciente</button>
+    </form>
+
+    <hr class="my-4" />
+
+    <h2 class="text-center">📑 Lista de Pacientes</h2>
+    <table class="table table-bordered mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>Nombre</th>
+          <th>Edad</th>
+          <th>Género</th>
+          <th>Documento</th>
+          <th>Síntomas</th>
+          <th>Gravedad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tablaPacientes"></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

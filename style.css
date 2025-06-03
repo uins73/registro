@@ -1,0 +1,26 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.triaje-leve {
+  background-color: #d4edda;
+}
+
+.triaje-moderado {
+  background-color: #fff3cd;
+}
+
+.triaje-urgente {
+  background-color: #ffeeba;
+}
+
+.triaje-critico {
+  background-color: #f8d7da;
+  font-weight: bold;
+  animation: parpadeo 1s infinite alternate;
+}
+
+@keyframes parpadeo {
+  from { background-color: #f8d7da; }
+  to { background-color: #f5c6cb; }
+}
