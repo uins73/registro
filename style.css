@@ -1,26 +1,87 @@
+/* Colores para el Triaje */
+.gravedad-critico {
+    background-color: #f8d7da !important; /* Rojo claro */
+    border-left: 5px solid #dc3545; /* Rojo */
+}
+
+.gravedad-urgente {
+    background-color: #fff3cd !important; /* Naranja claro */
+    border-left: 5px solid #fd7e14; /* Naranja */
+}
+
+.gravedad-moderado {
+    background-color: #ffeeba !important; /* Amarillo claro */
+    border-left: 5px solid #ffc107; /* Amarillo */
+}
+
+.gravedad-leve {
+    background-color: #d4edda !important; /* Verde claro */
+    border-left: 5px solid #28a745; /* Verde */
+}
+
+/* ELIMINADO: Estilos para la tabla de referencia de gravedad */
+/*
+.card .table-bordered td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.card .table-bordered td:first-child {
+    width: 25px;
+    height: 25px;
+    border: 1px solid #dee2e6;
+}
+*/
+
+/* Estilos adicionales para mejorar la apariencia y responsividad */
 body {
-  font-family: 'Segoe UI', sans-serif;
+    background-color: #f8f9fa; /* Color de fondo suave */
 }
 
-.triaje-leve {
-  background-color: #d4edda;
+.container-fluid {
+    padding: 0;
 }
 
-.triaje-moderado {
-  background-color: #fff3cd;
+header {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    padding: 1rem 0;
 }
 
-.triaje-urgente {
-  background-color: #ffeeba;
+.tab-content {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: .5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
-.triaje-critico {
-  background-color: #f8d7da;
-  font-weight: bold;
-  animation: parpadeo 1s infinite alternate;
+.nav-tabs .nav-link {
+    font-weight: bold;
+    color: #495057;
 }
 
-@keyframes parpadeo {
-  from { background-color: #f8d7da; }
-  to { background-color: #f5c6cb; }
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Mensajes de alerta para campos inválidos */
+.form-control.is-invalid,
+.form-select.is-invalid,
+.form-check-input.is-invalid {
+    border-color: #dc3545;
+}
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus,
+.form-check-input.is-invalid:focus {
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+/* Posición para la alerta crítica */
+.fixed-top-right {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    width: auto;
+    max-width: 350px;
 }
