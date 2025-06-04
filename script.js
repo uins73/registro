@@ -1,16 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias a los elementos del DOM para el Login ---
+    // --- Referencias a los elementos del DOM para el Login/Registro ---
     const loginSection = document.getElementById('login-section');
     const appContent = document.getElementById('app-content');
+    const authTitle = document.getElementById('authTitle'); // Nuevo
     const loginForm = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const loginError = document.getElementById('loginError');
     const btnLogout = document.getElementById('btnLogout');
 
+    // Referencias para el Registro (Nuevas)
+    const registerForm = document.getElementById('registerForm');
+    const registerUsernameInput = document.getElementById('registerUsername');
+    const registerPasswordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const registerError = document.getElementById('registerError');
+    const registerSuccess = document.getElementById('registerSuccess');
+    const showRegisterLink = document.getElementById('showRegisterLink');
+    const showLoginLink = document.getElementById('showLoginLink');
+
     // --- Credenciales de ejemplo (Para un sistema real, esto sería validado en un servidor) ---
-    const USERNAME = 'admin';
-    const PASSWORD = 'password123';
+    // Removido USERNAME y PASSWORD fijos. Ahora se cargarán desde localStorage.
+    let users = JSON.parse(localStorage.getItem('users')) || [{ username: 'admin', password: 'password123' }];
+    // Si no hay usuarios, agregamos el predeterminado.
 
     // Declarar las variables que se referencian en showApp() para que tengan un ámbito global en DOMContentLoaded
     let pacienteForm;
@@ -100,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const registroTab = new bootstrap.Tab(document.getElementById('registro-tab'));
         registroTab.show();
 
-        // --- RE-ADJUNTAR LISTENERS ---
+        // --- RE-ADJUNTAR LISTENERS (para la app principal) ---
+        // Se aseguran de que los listeners estén en los elementos correctos después de obtener las referencias
         pacienteForm.querySelectorAll('input, select, textarea').forEach(input => {
             input.removeEventListener('input', handleValidation);
             input.addEventListener('input', handleValidation);
@@ -109,9 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
         limitePacientesInput.addEventListener('input', handleLimiteChange);
         pacienteForm.removeEventListener('submit', handleSubmitForm);
         pacienteForm.addEventListener('submit', handleSubmitForm);
-        tablaPacientesBody.removeEventListener('click', handleDeletePaciente); // Re-adjuntar eliminar
+        tablaPacientesBody.removeEventListener('click', handleDeletePaciente);
         tablaPacientesBody.addEventListener('click', handleDeletePaciente);
-        tablaPacientesBody.removeEventListener('click', handleDownloadPaciente); // **NUEVO: Re-adjuntar descarga**
+        tablaPacientesBody.removeEventListener('click', handleDownloadPaciente);
         tablaPacientesBody.addEventListener('click', handleDownloadPaciente);
         myTab.removeEventListener('shown.bs.tab', handleTabShow);
         myTab.addEventListener('shown.bs.tab', handleTabShow);
@@ -121,9 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
         loginSection.classList.remove('d-none');
         appContent.classList.add('d-none');
         localStorage.removeItem('loggedIn');
+        // Limpiar campos de login
         usernameInput.value = '';
         passwordInput.value = '';
         loginError.classList.add('d-none');
+        // Asegurarse de que el formulario de login esté visible al salir
+        loginForm.classList.remove('d-none');
+        registerForm.classList.add('d-none');
+        authTitle.textContent = 'Iniciar Sesión';
+        // Limpiar campos de registro
+        registerUsernameInput.value = '';
+        registerPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        registerError.classList.add('d-none');
+        registerSuccess.classList.add('d-none');
+        // Guardar pacientes antes de cerrar sesión
         localStorage.setItem('pacientes', JSON.stringify(pacientes));
     }
 
@@ -133,7 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = usernameInput.value;
         const password = passwordInput.value;
 
-        if (username === USERNAME && password === PASSWORD) {
+        // Validar contra la lista de usuarios
+        const userFound = users.find(user => user.username === username && user.password === password);
+
+        if (userFound) {
             localStorage.setItem('loggedIn', 'true');
             showApp();
         } else {
@@ -148,7 +176,108 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Funciones de Validación ---
+    // --- Lógica para alternar entre formularios de Login y Registro ---
+    showRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('d-none');
+        registerForm.classList.remove('d-none');
+        authTitle.textContent = 'Crear Cuenta';
+        loginError.classList.add('d-none'); // Ocultar errores de login al cambiar
+        registerSuccess.classList.add('d-none'); // Ocultar éxito si se mostró antes
+        registerError.classList.add('d-none'); // Ocultar errores de registro
+        // Limpiar campos de login al cambiar
+        usernameInput.value = '';
+        passwordInput.value = '';
+        // Resetear validación visual de campos de registro
+        registerUsernameInput.classList.remove('is-valid', 'is-invalid');
+        registerPasswordInput.classList.remove('is-valid', 'is-invalid');
+        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+    });
+
+    showLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('d-none');
+        loginForm.classList.remove('d-none');
+        authTitle.textContent = 'Iniciar Sesión';
+        registerError.classList.add('d-none'); // Ocultar errores de registro al cambiar
+        registerSuccess.classList.add('d-none'); // Ocultar éxito si se mostró antes
+        loginError.classList.add('d-none'); // Ocultar errores de login
+        // Limpiar campos de registro al cambiar
+        registerUsernameInput.value = '';
+        registerPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        // Resetear validación visual de campos de login
+        usernameInput.classList.remove('is-valid', 'is-invalid');
+        passwordInput.classList.remove('is-valid', 'is-invalid');
+    });
+
+    // --- Manejo del Registro ---
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newUsername = registerUsernameInput.value.trim();
+        const newPassword = registerPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        // Limpiar mensajes anteriores
+        registerError.classList.add('d-none');
+        registerSuccess.classList.add('d-none');
+
+        // Validaciones del formulario de registro
+        let isValidRegisterForm = true;
+
+        const validateRegisterUsername = (val) => val.length >= 3 && !/\s/.test(val); // No espacios
+        const validateRegisterPassword = (val) => val.length >= 6;
+        const validateConfirmPassword = (pass1, pass2) => pass1 === pass2;
+
+        isValidRegisterForm = validarCampo(registerUsernameInput, validateRegisterUsername) && isValidRegisterForm;
+        isValidRegisterForm = validarCampo(registerPasswordInput, validateRegisterPassword) && isValidRegisterForm;
+        
+        // Validación específica para confirmar contraseña
+        if (!validateConfirmPassword(newPassword, confirmPassword)) {
+            confirmPasswordInput.classList.add('is-invalid');
+            confirmPasswordInput.classList.remove('is-valid');
+            isValidRegisterForm = false;
+        } else {
+            confirmPasswordInput.classList.remove('is-invalid');
+            confirmPasswordInput.classList.add('is-valid');
+        }
+
+        if (!isValidRegisterForm) {
+            registerError.textContent = 'Por favor, complete todos los campos de registro correctamente.';
+            registerError.classList.remove('d-none');
+            return;
+        }
+
+        // Verificar si el usuario ya existe
+        const userExists = users.some(user => user.username === newUsername);
+        if (userExists) {
+            registerError.textContent = 'El usuario ya existe. Por favor, elija otro nombre de usuario.';
+            registerError.classList.remove('d-none');
+            return;
+        }
+
+        // Si todo es válido, registrar nuevo usuario
+        users.push({ username: newUsername, password: newPassword });
+        localStorage.setItem('users', JSON.stringify(users)); // Guardar nuevos usuarios
+        registerSuccess.classList.remove('d-none'); // Mostrar mensaje de éxito
+        registerError.classList.add('d-none');
+
+        // Opcional: limpiar campos después del registro exitoso
+        registerUsernameInput.value = '';
+        registerPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        // Resetear la validación visual
+        registerUsernameInput.classList.remove('is-valid', 'is-invalid');
+        registerPasswordInput.classList.remove('is-valid', 'is-invalid');
+        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+
+        // Opcional: cambiar automáticamente a la pantalla de login después de un registro exitoso
+        setTimeout(() => {
+            showLoginLink.click();
+        }, 2000); // Cambia a login después de 2 segundos
+    });
+
+    // --- Funciones de Validación (Se mantienen iguales) ---
     function handleValidation() {
         switch (this.id) {
             case 'nombre': validarCampo(this, validarNombre); break;
@@ -160,8 +289,21 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'tratamiento': validarCampo(this, validarTratamiento); break;
             case 'medicamentos': validarCampo(this, validarMedicamentos); break;
             case 'examenes': validarCampo(this, validarExamenes); break;
+            // Nuevas validaciones para el formulario de registro
+            case 'registerUsername': validarCampo(this, (val) => val.length >= 3 && !/\s/.test(val)); break;
+            case 'registerPassword': validarCampo(this, (val) => val.length >= 6); break;
+            case 'confirmPassword':
+                const regPass = registerPasswordInput.value;
+                const confPass = this.value;
+                validarCampo(this, (val) => regPass === confPass);
+                break;
         }
     }
+    // ... (el resto de tus funciones: validarCampo, mostrarAlerta, actualizarContadorLimite, etc.) ...
+    // Asegúrate de que todas las funciones que definiste previamente estén aquí,
+    // incluyendo las funciones de descarga y las de los gráficos.
+    // Solo estoy mostrando los cambios relevantes para el login/registro.
+
     const validarCampo = (inputElement, validationFn) => {
         const value = inputElement.value.trim();
         const isValid = validationFn(value);
@@ -348,10 +490,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- NUEVA FUNCIÓN: Descargar paciente ---
-    // --- NUEVA FUNCIÓN MODIFICADA: Descargar paciente en formato TXT ---
+    // --- FUNCIÓN: Descargar paciente en formato TXT (sin cambios) ---
     function descargarPaciente(paciente) {
-        // Formatear la información del paciente para el archivo TXT
         let pacienteTxt = `--- Información del Paciente ---\n\n`;
         pacienteTxt += `ID: ${paciente.id}\n`;
         pacienteTxt += `Nombre: ${paciente.nombre}\n`;
@@ -359,28 +499,26 @@ document.addEventListener('DOMContentLoaded', () => {
         pacienteTxt += `Género: ${paciente.genero}\n`;
         pacienteTxt += `Documento: ${paciente.documento}\n`;
         pacienteTxt += `Síntomas: ${paciente.sintomas}\n`;
-        pacienteTxt += `Gravedad: ${paciente.gravedad.charAt(0).toUpperCase() + paciente.gravedad.slice(1)}\n`; // Primera letra mayúscula
+        pacienteTxt += `Gravedad: ${paciente.gravedad.charAt(0).toUpperCase() + paciente.gravedad.slice(1)}\n`;
         pacienteTxt += `Tratamiento: ${paciente.tratamiento}\n`;
         pacienteTxt += `Medicamentos: ${paciente.medicamentos}\n`;
         pacienteTxt += `Exámenes: ${paciente.examenes}\n\n`;
         pacienteTxt += `------------------------------\n`;
 
-        // Crear un Blob con el contenido de texto plano
         const blob = new Blob([pacienteTxt], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
 
         const a = document.createElement('a');
         a.href = url;
-        // Nombre del archivo: paciente_Nombre_Apellido.txt
         a.download = `informacion_paciente_${paciente.nombre.replace(/\s+/g, '_')}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url); // Libera el URL del objeto
+        URL.revokeObjectURL(url);
         mostrarAlerta(`Información de ${paciente.nombre} descargada en formato TXT.`, 'info');
     }
 
-    // --- NUEVO EVENT LISTENER: Manejar clic en botón de descarga ---
+    // --- EVENT LISTENER: Manejar clic en botón de descarga (sin cambios) ---
     function handleDownloadPaciente(e) {
         if (e.target.classList.contains('descargar-paciente')) {
             const pacienteId = parseFloat(e.target.dataset.id);
@@ -390,7 +528,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
 
     function inicializarGraficos() {
         const ctxDoughnut = document.getElementById('gravedadDoughnutChart').getContext('2d');
