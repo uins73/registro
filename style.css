@@ -72,34 +72,28 @@ header {
     max-width: 350px;
 }
 
-/* --- Estilos para contener los gráficos --- */
+/* --- Estilos para contener el gráfico (AJUSTADO) --- */
 .chart-container-wrapper {
-    position: relative; /* Importante para que Chart.js calcule bien el tamaño */
-    height: 350px; /* Define una altura fija para los gráficos */
-    overflow: hidden; /* Asegura que el contenido que se desborde se oculte */
-    padding: 10px; /* Añadimos un pequeño padding para que el gráfico no se pegue al borde */
+    position: relative; /* Esencial para el position: absolute del canvas */
+    /* REMOVED: height: 350px; <-- Eliminamos la altura fija del contenedor */
+    overflow: hidden; /* Sigue siendo útil para recortar si algo se sale */
+    padding: 10px; /* Pequeño relleno interno */
+    /* Aseguramos una altura mínima para el contenedor, si es necesario, pero el canvas la definirá más */
+    min-height: 380px; /* Ajusta este valor si necesitas más espacio vertical */
 }
 
-/* Ajuste de altura para pantallas más pequeñas */
 @media (max-width: 768px) {
     .chart-container-wrapper {
-        height: 300px;
+        min-height: 330px; /* Menos altura para pantallas pequeñas */
     }
 }
 
-/* --- SOLUCIÓN PARA EL DESBORDAMIENTO DEL CANVAS (AJUSTADO) --- */
-/* Asegura que el canvas se ajuste a su contenedor padre */
+/* --- SOLUCIÓN PARA EL DESBORDAMIENTO DEL CANVAS --- */
+/* Forzamos que el canvas ocupe el 100% del contenedor usando posición absoluta */
 .chart-container-wrapper canvas {
-    width: 100% !important;
-    height: 100% !important;
-    /* display: block; REMOVED: A veces Chart.js prefiere que el canvas se gestione internamente */
-}
-
-/* Si el canvas sigue desbordándose, una medida drástica puede ser: */
-/* .chart-container-wrapper canvas {
-    position: absolute;
+    position: absolute; /* CLAVE: Posicionamiento absoluto */
     top: 0;
     left: 0;
     width: 100% !important;
     height: 100% !important;
-} */
+}
