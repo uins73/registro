@@ -19,20 +19,6 @@
     border-left: 5px solid #28a745; /* Verde */
 }
 
-/* ELIMINADO: Estilos para la tabla de referencia de gravedad */
-/*
-.card .table-bordered td {
-    padding: 0.5rem;
-    vertical-align: middle;
-}
-
-.card .table-bordered td:first-child {
-    width: 25px;
-    height: 25px;
-    border: 1px solid #dee2e6;
-}
-*/
-
 /* Estilos adicionales para mejorar la apariencia y responsividad */
 body {
     background-color: #f8f9fa; /* Color de fondo suave */
@@ -81,7 +67,39 @@ header {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 1050;
+    z-index: 1050; /* Por encima de otros elementos */
     width: auto;
     max-width: 350px;
 }
+
+/* --- Estilos para contener los gráficos --- */
+.chart-container-wrapper {
+    position: relative; /* Importante para que Chart.js calcule bien el tamaño */
+    height: 350px; /* Define una altura fija para los gráficos */
+    overflow: hidden; /* Asegura que el contenido que se desborde se oculte */
+    padding: 10px; /* Añadimos un pequeño padding para que el gráfico no se pegue al borde */
+}
+
+/* Ajuste de altura para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .chart-container-wrapper {
+        height: 300px;
+    }
+}
+
+/* --- SOLUCIÓN PARA EL DESBORDAMIENTO DEL CANVAS (AJUSTADO) --- */
+/* Asegura que el canvas se ajuste a su contenedor padre */
+.chart-container-wrapper canvas {
+    width: 100% !important;
+    height: 100% !important;
+    /* display: block; REMOVED: A veces Chart.js prefiere que el canvas se gestione internamente */
+}
+
+/* Si el canvas sigue desbordándose, una medida drástica puede ser: */
+/* .chart-container-wrapper canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+} */
