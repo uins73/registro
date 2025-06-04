@@ -9,156 +9,178 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container-fluid">
-        <header class="bg-primary text-white text-center py-3 mb-4 d-flex align-items-center justify-content-between">
-            <h1 class="display-6 m-0 ms-3">Sistema de Registro de Pacientes en Emergencias</h1>
-            <button class="btn btn-danger me-3" id="btnLogout">Cerrar Sesión</button>
-        </header>
+    <div id="login-section" class="d-flex align-items-center justify-content-center vh-100 bg-light">
+        <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
+            <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="username" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Acceder</button>
+                <div id="loginError" class="alert alert-danger mt-3 d-none" role="alert">
+                    Usuario o contraseña incorrectos.
+                </div>
+            </form>
+        </div>
+    </div>
 
-        <main class="container">
-            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="true">Registro de Pacientes</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab" aria-controls="lista" aria-selected="false">Lista de Pacientes</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="estadisticas-tab" data-bs-toggle="tab" data-bs-target="#estadisticas" type="button" role="tab" aria-controls="estadisticas" aria-selected="false">Estadísticas</button>
-                </li>
-            </ul>
+    <div id="app-content" class="d-none"> <div class="container-fluid">
+            <header class="bg-primary text-white text-center py-3 mb-4 d-flex align-items-center justify-content-between">
+                <h1 class="display-6 m-0 ms-3">Sistema de Registro de Pacientes en Emergencias</h1>
+                <button class="btn btn-danger me-3" id="btnLogout">Cerrar Sesión</button>
+            </header>
 
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="registro" role="tabpanel" aria-labelledby="registro-tab">
-                    <h2 class="mb-3">Registrar Nuevo Paciente</h2>
-                    <div class="row">
-                        <div class="col-12"> 
-                            <form id="pacienteForm" class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="nombre" class="form-label">Nombre completo</label>
-                                    <input type="text" class="form-control" id="nombre" required>
-                                    <div class="invalid-feedback">Por favor, ingrese el nombre completo.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="edad" class="form-label">Edad</label>
-                                    <input type="number" class="form-control" id="edad" required min="1">
-                                    <div class="invalid-feedback">La edad debe ser un número mayor a 0.</div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="genero" class="form-label">Género</label>
-                                    <select class="form-select" id="genero" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Hombre">Hombre</option>
-                                        <option value="Mujer">Mujer</option>
-                                    </select>
-                                    <div class="invalid-feedback">Por favor, seleccione el género.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="documento" class="form-label">Documento de identidad (CI/Pasaporte)</label>
-                                    <input type="text" class="form-control" id="documento" required minlength="5">
-                                    <div class="invalid-feedback">El documento debe tener al menos 5 caracteres.</div>
-                                </div>
-                                <div class="col-12">
-                                    <label for="sintomas" class="form-label">Síntomas</label>
-                                    <textarea class="form-control" id="sintomas" rows="3" required></textarea>
-                                    <div class="invalid-feedback">Por favor, describa los síntomas.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="gravedad" class="form-label">Nivel de Gravedad</label>
-                                    <select class="form-select" id="gravedad" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="leve">🟩 Leve</option>
-                                        <option value="moderado">🟨 Moderado</option>
-                                        <option value="urgente">🟧 Urgente</option>
-                                        <option value="critico">🟥 Crítico</option>
-                                    </select>
-                                    <div class="invalid-feedback">Por favor, seleccione el nivel de gravedad.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="tratamiento" class="form-label">Tratamiento</label>
-                                    <input type="text" class="form-control" id="tratamiento" required>
-                                    <div class="invalid-feedback">Por favor, ingrese el tratamiento.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="medicamentos" class="form-label">Medicamentos</label>
-                                    <input type="text" class="form-control" id="medicamentos" required>
-                                    <div class="invalid-feedback">Por favor, ingrese los medicamentos.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="examenes" class="form-label">Exámenes</label>
-                                    <select class="form-select" id="examenes" required>
-                                        <option value="">Seleccione...</option>
-                                        <option value="Hemograma">Hemograma</option>
-                                        <option value="Radiografía">Radiografía</option>
-                                        <option value="Tomografía">Tomografía</option>
-                                        <option value="Orina">Orina</option>
-                                        <option value="Ninguno">Ninguno</option>
-                                    </select>
-                                    <div class="invalid-feedback">Por favor, seleccione los exámenes.</div>
-                                </div>
+            <main class="container">
+                <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="true">Registro de Pacientes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button" role="tab" aria-controls="lista" aria-selected="false">Lista de Pacientes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="estadisticas-tab" data-bs-toggle="tab" data-bs-target="#estadisticas" type="button" role="tab" aria-controls="estadisticas" aria-selected="false">Estadísticas</button>
+                    </li>
+                </ul>
 
-                                <div class="col-md-6">
-                                    <label for="limitePacientes" class="form-label">Límite de Pacientes del Hospital</label>
-                                    <input type="number" class="form-control" id="limitePacientes" value="10" min="1">
-                                    <div class="form-text">Establece el número máximo de pacientes que el hospital puede atender.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Pacientes Actuales</label>
-                                    <p class="form-control-plaintext"><strong id="totalPacientesActuales">0</strong> / <span id="limiteMostrado">10</span></p>
-                                </div>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="registro" role="tabpanel" aria-labelledby="registro-tab">
+                        <h2 class="mb-3">Registrar Nuevo Paciente</h2>
+                        <div class="row">
+                            <div class="col-12">
+                                <form id="pacienteForm" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombre" class="form-label">Nombre completo</label>
+                                        <input type="text" class="form-control" id="nombre" required>
+                                        <div class="invalid-feedback">Por favor, ingrese el nombre completo.</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="edad" class="form-label">Edad</label>
+                                        <input type="number" class="form-control" id="edad" required min="1">
+                                        <div class="invalid-feedback">La edad debe ser un número mayor a 0.</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="genero" class="form-label">Género</label>
+                                        <select class="form-select" id="genero" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="Hombre">Hombre</option>
+                                            <option value="Mujer">Mujer</option>
+                                        </select>
+                                        <div class="invalid-feedback">Por favor, seleccione el género.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="documento" class="form-label">Documento de identidad (CI/Pasaporte)</label>
+                                        <input type="text" class="form-control" id="documento" required minlength="5">
+                                        <div class="invalid-feedback">El documento debe tener al menos 5 caracteres.</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="sintomas" class="form-label">Síntomas</label>
+                                        <textarea class="form-control" id="sintomas" rows="3" required></textarea>
+                                        <div class="invalid-feedback">Por favor, describa los síntomas.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gravedad" class="form-label">Nivel de Gravedad</label>
+                                        <select class="form-select" id="gravedad" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="leve">🟩 Leve</option>
+                                            <option value="moderado">🟨 Moderado</option>
+                                            <option value="urgente">🟧 Urgente</option>
+                                            <option value="critico">🟥 Crítico</option>
+                                        </select>
+                                        <div class="invalid-feedback">Por favor, seleccione el nivel de gravedad.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="tratamiento" class="form-label">Tratamiento</label>
+                                        <input type="text" class="form-control" id="tratamiento" required>
+                                        <div class="invalid-feedback">Por favor, ingrese el tratamiento.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="medicamentos" class="form-label">Medicamentos</label>
+                                        <input type="text" class="form-control" id="medicamentos" required>
+                                        <div class="invalid-feedback">Por favor, ingrese los medicamentos.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="examenes" class="form-label">Exámenes</label>
+                                        <select class="form-select" id="examenes" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="Hemograma">Hemograma</option>
+                                            <option value="Radiografía">Radiografía</option>
+                                            <option value="Tomografía">Tomografía</option>
+                                            <option value="Orina">Orina</option>
+                                            <option value="Ninguno">Ninguno</option>
+                                        </select>
+                                        <div class="invalid-feedback">Por favor, seleccione los exámenes.</div>
+                                    </div>
 
-                                <div class="col-12 text-center mt-4">
-                                    <button type="submit" class="btn btn-primary btn-lg me-2" id="btnRegistrarPaciente">Registrar Paciente</button>
-                                    <button type="reset" class="btn btn-secondary btn-lg">Limpiar Formulario</button>
-                                </div>
-                            </form>
+                                    <div class="col-md-6">
+                                        <label for="limitePacientes" class="form-label">Límite de Pacientes del Hospital</label>
+                                        <input type="number" class="form-control" id="limitePacientes" value="10" min="1">
+                                        <div class="form-text">Establece el número máximo de pacientes que el hospital puede atender.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Pacientes Actuales</label>
+                                        <p class="form-control-plaintext"><strong id="totalPacientesActuales">0</strong> / <span id="limiteMostrado">10</span></p>
+                                    </div>
+
+                                    <div class="col-12 text-center mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg me-2" id="btnRegistrarPaciente">Registrar Paciente</button>
+                                        <button type="reset" class="btn btn-secondary btn-lg">Limpiar Formulario</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="tab-pane fade" id="lista" role="tabpanel" aria-labelledby="lista-tab">
-                    <h2 class="mb-3">Pacientes Registrados</h2>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Edad</th>
-                                    <th>Género</th>
-                                    <th>Documento</th>
-                                    <th>Síntomas</th>
-                                    <th>Gravedad</th>
-                                    <th>Tratamiento</th>
-                                    <th>Medicamentos</th>
-                                    <th>Exámenes</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaPacientesBody">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="estadisticas" role="tabpanel" aria-labelledby="estadisticas-tab">
-                    <h2 class="mb-3">Estadísticas de Pacientes por Nivel de Gravedad</h2>
-                    <p class="lead text-muted">Aquí tienes un resumen visual de la cantidad de pacientes actualmente registrados por su nivel de urgencia.</p>
-                    <div class="d-flex flex-wrap justify-content-center mb-4">
-                        <span class="badge bg-danger fs-5 me-3 mb-2 p-3">Críticos: <span id="countCritico">0</span></span>
-                        <span class="badge bg-warning fs-5 me-3 mb-2 p-3">Urgentes: <span id="countUrgente">0</span></span>
-                        <span class="badge bg-info fs-5 me-3 mb-2 p-3">Moderados: <span id="countModerado">0</span></span>
-                        <span class="badge bg-success fs-5 me-3 mb-2 p-3">Leves: <span id="countLeve">0</span></span>
+                    <div class="tab-pane fade" id="lista" role="tabpanel" aria-labelledby="lista-tab">
+                        <h2 class="mb-3">Pacientes Registrados</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Edad</th>
+                                        <th>Género</th>
+                                        <th>Documento</th>
+                                        <th>Síntomas</th>
+                                        <th>Gravedad</th>
+                                        <th>Tratamiento</th>
+                                        <th>Medicamentos</th>
+                                        <th>Exámenes</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaPacientesBody">
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="row justify-content-center"> <div class="col-md-6"> <div class="card p-3 mb-3 chart-container-wrapper"> 
-                                
-                                <canvas id="gravedadDoughnutChart" width="400" height="350"></canvas>
+                    <div class="tab-pane fade" id="estadisticas" role="tabpanel" aria-labelledby="estadisticas-tab">
+                        <h2 class="mb-3">Estadísticas de Pacientes por Nivel de Gravedad</h2>
+                        <p class="lead text-muted">Aquí tienes un resumen visual de la cantidad de pacientes actualmente registrados por su nivel de urgencia.</p>
+                        <div class="d-flex flex-wrap justify-content-center mb-4">
+                            <span class="badge bg-danger fs-5 me-3 mb-2 p-3">Críticos: <span id="countCritico">0</span></span>
+                            <span class="badge bg-warning fs-5 me-3 mb-2 p-3">Urgentes: <span id="countUrgente">0</span></span>
+                            <span class="badge bg-info fs-5 me-3 mb-2 p-3">Moderados: <span id="countModerado">0</span></span>
+                            <span class="badge bg-success fs-5 me-3 mb-2 p-3">Leves: <span id="countLeve">0</span></span>
+                        </div>
+
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="card p-3 mb-3 chart-container-wrapper">
+                                    <canvas id="gravedadDoughnutChart" width="400" height="350"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
