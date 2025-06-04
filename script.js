@@ -1,20 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const pacienteForm = document.getElementById('pacienteForm');
-    const tablaPacientesBody = document.getElementById('tablaPacientesBody');
+    // --- Referencias a los elementos del DOM para el Login ---
+    const loginSection = document.getElementById('login-section');
+    const appContent = document.getElementById('app-content');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
+    const btnLogout = document.getElementById('btnLogout');
 
-    const countCritico = document.getElementById('countCritico');
-    const countUrgente = document.getElementById('countUrgente');
-    const countModerado = document.getElementById('countModerado');
-    const countLeve = document.getElementById('countLe_e');
+    // --- Credenciales de ejemplo (Para un sistema real, esto sería validado en un servidor) ---
+    const USERNAME = 'admin';
+    const PASSWORD = 'password123';
 
-    const limitePacientesInput = document.getElementById('limitePacientes');
-    const totalPacientesActualesSpan = document.getElementById('totalPacientesActuales');
-    const limiteMostradoSpan = document.getElementById('limiteMostrado');
-    const btnRegistrarPaciente = document.getElementById('btnRegistrarPaciente');
-
-    let limiteHospital = parseInt(limitePacientesInput.value);
-
+    // Declarar las variables que se referencian en showApp() para que tengan un ámbito global en DOMContentLoaded
+    let pacienteForm;
+    let tablaPacientesBody;
+    let countCritico;
+    let countUrgente;
+    let countModerado;
+    let countLeve;
+    let limitePacientesInput;
+    let totalPacientesActualesSpan;
+    let limiteMostradoSpan;
+    let btnRegistrarPaciente;
+    let limiteHospital;
     let gravedadDoughnutChart;
+    const myTab = document.getElementById('myTab');
 
     class Paciente {
         constructor(nombre, edad, genero, documento, sintomas, gravedad, tratamiento, medicamentos, examenes) {
@@ -39,9 +50,119 @@ document.addEventListener('DOMContentLoaded', () => {
         new Paciente('Carlos Ruiz', 28, 'Hombre', '11223344', 'Tos persistente, secreción nasal', 'leve', 'Jarabe para la tos', 'Vitamina C', 'Ninguno'),
         new Paciente('Ana López', 45, 'Mujer', '55667788', 'Dolor abdominal agudo', 'moderado', 'Dieta blanda, hidratación', 'Buscapina', 'Ecografía abdominal')
     ];
-    pacientes.push(...pacientesPredeterminados);
 
-    function validarCampo(inputElement, validationFn) {
+    // --- Funciones para verificar el estado de la sesión y mostrar/ocultar secciones ---
+    function checkSession() {
+        const loggedIn = localStorage.getItem('loggedIn');
+        if (loggedIn === 'true') {
+            showApp();
+        } else {
+            showLogin();
+        }
+    }
+
+    function showApp() {
+        loginSection.classList.add('d-none');
+        appContent.classList.remove('d-none');
+
+        // --- ESTO ES CRUCIAL: OBTENER LAS REFERENCIAS DEL DOM AQUÍ ---
+        pacienteForm = document.getElementById('pacienteForm');
+        tablaPacientesBody = document.getElementById('tablaPacientesBody');
+        countCritico = document.getElementById('countCritico');
+        countUrgente = document.getElementById('countUrgente');
+        countModerado = document.getElementById('countModerado');
+        countLeve = document.getElementById('countLeve');
+        limitePacientesInput = document.getElementById('limitePacientes');
+        totalPacientesActualesSpan = document.getElementById('totalPacientesActuales');
+        limiteMostradoSpan = document.getElementById('limiteMostrado');
+        btnRegistrarPaciente = document.getElementById('btnRegistrarPaciente');
+
+        limiteHospital = parseInt(limitePacientesInput.value);
+
+        // --- Cargar pacientes o usar predeterminados ---
+        const pacientesGuardados = JSON.parse(localStorage.getItem('pacientes'));
+        if (pacientesGuardados && pacientesGuardados.length > 0) {
+            pacientes = pacientesGuardados;
+        } else {
+            pacientes = [...pacientesPredeterminados];
+        }
+
+        // --- LÓGICA DE INICIALIZACIÓN DE LA APLICACIÓN ---
+        actualizarTablaPacientes();
+        actualizarContadoresEstadisticas();
+        actualizarContadorLimite();
+
+        if (!gravedadDoughnutChart) {
+            inicializarGraficos();
+        }
+        actualizarGraficos();
+
+        const registroTab = new bootstrap.Tab(document.getElementById('registro-tab'));
+        registroTab.show();
+
+        // --- RE-ADJUNTAR LISTENERS ---
+        pacienteForm.querySelectorAll('input, select, textarea').forEach(input => {
+            input.removeEventListener('input', handleValidation);
+            input.addEventListener('input', handleValidation);
+        });
+        limitePacientesInput.removeEventListener('input', handleLimiteChange);
+        limitePacientesInput.addEventListener('input', handleLimiteChange);
+        pacienteForm.removeEventListener('submit', handleSubmitForm);
+        pacienteForm.addEventListener('submit', handleSubmitForm);
+        tablaPacientesBody.removeEventListener('click', handleDeletePaciente); // Re-adjuntar eliminar
+        tablaPacientesBody.addEventListener('click', handleDeletePaciente);
+        tablaPacientesBody.removeEventListener('click', handleDownloadPaciente); // **NUEVO: Re-adjuntar descarga**
+        tablaPacientesBody.addEventListener('click', handleDownloadPaciente);
+        myTab.removeEventListener('shown.bs.tab', handleTabShow);
+        myTab.addEventListener('shown.bs.tab', handleTabShow);
+    }
+
+    function showLogin() {
+        loginSection.classList.remove('d-none');
+        appContent.classList.add('d-none');
+        localStorage.removeItem('loggedIn');
+        usernameInput.value = '';
+        passwordInput.value = '';
+        loginError.classList.add('d-none');
+        localStorage.setItem('pacientes', JSON.stringify(pacientes));
+    }
+
+    // --- Manejo del Login ---
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+
+        if (username === USERNAME && password === PASSWORD) {
+            localStorage.setItem('loggedIn', 'true');
+            showApp();
+        } else {
+            loginError.classList.remove('d-none');
+        }
+    });
+
+    // --- Manejo del Logout ---
+    btnLogout.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres cerrar la sesión?')) {
+            showLogin();
+        }
+    });
+
+    // --- Funciones de Validación ---
+    function handleValidation() {
+        switch (this.id) {
+            case 'nombre': validarCampo(this, validarNombre); break;
+            case 'edad': validarCampo(this, validarEdad); break;
+            case 'genero': validarCampo(this, validarGenero); break;
+            case 'documento': validarCampo(this, validarDocumento); break;
+            case 'sintomas': validarCampo(this, validarSintomas); break;
+            case 'gravedad': validarCampo(this, validarGravedad); break;
+            case 'tratamiento': validarCampo(this, validarTratamiento); break;
+            case 'medicamentos': validarCampo(this, validarMedicamentos); break;
+            case 'examenes': validarCampo(this, validarExamenes); break;
+        }
+    }
+    const validarCampo = (inputElement, validationFn) => {
         const value = inputElement.value.trim();
         const isValid = validationFn(value);
         if (isValid) {
@@ -52,8 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inputElement.classList.add('is-invalid');
         }
         return isValid;
-    }
-
+    };
     const validarNombre = (valor) => valor.length > 0;
     const validarEdad = (valor) => parseInt(valor) > 0 && !isNaN(parseInt(valor));
     const validarGenero = (valor) => valor !== '';
@@ -63,22 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const validarTratamiento = (valor) => valor.length > 0;
     const validarMedicamentos = (valor) => valor.length > 0;
     const validarExamenes = (valor) => valor !== '';
-
-    pacienteForm.querySelectorAll('input, select, textarea').forEach(input => {
-        input.addEventListener('input', () => {
-            switch (input.id) {
-                case 'nombre': validarCampo(input, validarNombre); break;
-                case 'edad': validarCampo(input, validarEdad); break;
-                case 'genero': validarCampo(input, validarGenero); break;
-                case 'documento': validarCampo(input, validarDocumento); break;
-                case 'sintomas': validarCampo(input, validarSintomas); break;
-                case 'gravedad': validarCampo(input, validarGravedad); break;
-                case 'tratamiento': validarCampo(input, validarTratamiento); break;
-                case 'medicamentos': validarCampo(input, validarMedicamentos); break;
-                case 'examenes': validarCampo(input, validarExamenes); break;
-            }
-        });
-    });
 
     function mostrarAlerta(mensaje, tipo = 'info') {
         const alertPlaceholder = document.createElement('div');
@@ -109,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    limitePacientesInput.addEventListener('input', () => {
+    function handleLimiteChange() {
         const nuevoLimite = parseInt(limitePacientesInput.value);
         if (!isNaN(nuevoLimite) && nuevoLimite > 0) {
             limiteHospital = nuevoLimite;
@@ -119,9 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
             limiteHospital = 1;
             actualizarContadorLimite();
         }
-    });
+    }
 
-    pacienteForm.addEventListener('submit', (e) => {
+    function handleSubmitForm(e) {
         e.preventDefault();
 
         if (pacientes.length >= limiteHospital) {
@@ -159,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         pacientes.push(nuevoPaciente);
+        localStorage.setItem('pacientes', JSON.stringify(pacientes));
         actualizarTablaPacientes();
         actualizarContadoresEstadisticas();
         actualizarGraficos();
@@ -175,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const listaTab = new bootstrap.Tab(document.getElementById('lista-tab'));
         listaTab.show();
-    });
+    }
 
     function actualizarContadoresEstadisticas() {
         let criticos = 0, urgentes = 0, moderados = 0, leves = 0;
@@ -209,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pacientes.forEach(paciente => {
             const row = tablaPacientesBody.insertRow();
             row.classList.add(`gravedad-${paciente.gravedad}`);
-            
+
             const gravedadDisplay = paciente.gravedad.charAt(0).toUpperCase() + paciente.gravedad.slice(1);
 
             row.innerHTML = `
@@ -223,29 +328,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${paciente.medicamentos}</td>
                 <td>${paciente.examenes}</td>
                 <td>
+                    <button class="btn btn-info btn-sm descargar-paciente me-1" data-id="${paciente.id}">Descargar</button>
                     <button class="btn btn-danger btn-sm eliminar-paciente" data-id="${paciente.id}">Eliminar</button>
                 </td>
             `;
         });
     }
 
-    tablaPacientesBody.addEventListener('click', (e) => {
+    function handleDeletePaciente(e) {
         if (e.target.classList.contains('eliminar-paciente')) {
             const pacienteId = parseFloat(e.target.dataset.id);
             pacientes = pacientes.filter(paciente => paciente.id !== pacienteId);
+            localStorage.setItem('pacientes', JSON.stringify(pacientes));
             actualizarTablaPacientes();
             actualizarContadoresEstadisticas();
             actualizarGraficos();
             actualizarContadorLimite();
             mostrarAlerta('Paciente eliminado correctamente.', 'success');
         }
-    });
+    }
 
-    // --- Funciones para Gráficos (Solo Pastel) ---
+    // --- NUEVA FUNCIÓN: Descargar paciente ---
+    // --- NUEVA FUNCIÓN MODIFICADA: Descargar paciente en formato TXT ---
+    function descargarPaciente(paciente) {
+        // Formatear la información del paciente para el archivo TXT
+        let pacienteTxt = `--- Información del Paciente ---\n\n`;
+        pacienteTxt += `ID: ${paciente.id}\n`;
+        pacienteTxt += `Nombre: ${paciente.nombre}\n`;
+        pacienteTxt += `Edad: ${paciente.edad}\n`;
+        pacienteTxt += `Género: ${paciente.genero}\n`;
+        pacienteTxt += `Documento: ${paciente.documento}\n`;
+        pacienteTxt += `Síntomas: ${paciente.sintomas}\n`;
+        pacienteTxt += `Gravedad: ${paciente.gravedad.charAt(0).toUpperCase() + paciente.gravedad.slice(1)}\n`; // Primera letra mayúscula
+        pacienteTxt += `Tratamiento: ${paciente.tratamiento}\n`;
+        pacienteTxt += `Medicamentos: ${paciente.medicamentos}\n`;
+        pacienteTxt += `Exámenes: ${paciente.examenes}\n\n`;
+        pacienteTxt += `------------------------------\n`;
 
-function inicializarGraficos() {
+        // Crear un Blob con el contenido de texto plano
+        const blob = new Blob([pacienteTxt], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        // Nombre del archivo: paciente_Nombre_Apellido.txt
+        a.download = `informacion_paciente_${paciente.nombre.replace(/\s+/g, '_')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); // Libera el URL del objeto
+        mostrarAlerta(`Información de ${paciente.nombre} descargada en formato TXT.`, 'info');
+    }
+
+    // --- NUEVO EVENT LISTENER: Manejar clic en botón de descarga ---
+    function handleDownloadPaciente(e) {
+        if (e.target.classList.contains('descargar-paciente')) {
+            const pacienteId = parseFloat(e.target.dataset.id);
+            const pacienteAdescargar = pacientes.find(p => p.id === pacienteId);
+            if (pacienteAdescargar) {
+                descargarPaciente(pacienteAdescargar);
+            }
+        }
+    }
+
+
+    function inicializarGraficos() {
         const ctxDoughnut = document.getElementById('gravedadDoughnutChart').getContext('2d');
-        
+
         if (gravedadDoughnutChart) {
             gravedadDoughnutChart.destroy();
         }
@@ -267,31 +416,30 @@ function inicializarGraficos() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                // Ajustes del relleno del layout para dar espacio general
                 layout: {
                     padding: {
-                        left: 10,  // Reducimos un poco el padding lateral
-                        right: 10, // Reducimos un poco el padding lateral
-                        top: 30,   // Un poco menos de padding superior si el título ya no choca con nada
+                        left: 10,
+                        right: 10,
+                        top: 30,
                         bottom: 10
                     }
                 },
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top', // La leyenda se mantiene arriba
-                        align: 'center', // Centramos la leyenda para mejor apariencia
+                        position: 'top',
+                        align: 'center',
                         labels: {
                             font: {
                                 size: 14
                             },
                             boxWidth: 20,
-                            padding: 20 // Aumentamos el padding entre los ítems de la leyenda
+                            padding: 20
                         }
                     },
                     title: {
                         display: true,
-                        text: 'Distribución de Gravedad de Pacientes', // Este es el título que queremos mantener
+                        text: 'Distribución de Gravedad de Pacientes',
                         position: 'top',
                         align: 'center',
                         font: {
@@ -300,7 +448,7 @@ function inicializarGraficos() {
                         },
                         padding: {
                             top: 10,
-                            bottom: 25 // Aumentamos el padding inferior del título para separarlo de la leyenda
+                            bottom: 25
                         }
                     },
                     tooltip: {
@@ -353,19 +501,15 @@ function inicializarGraficos() {
         }
     }
 
-    const myTab = document.getElementById('myTab');
-    myTab.addEventListener('shown.bs.tab', function (event) {
+    function handleTabShow(event) {
         if (event.target.id === 'estadisticas-tab') {
             if (gravedadDoughnutChart) {
                 gravedadDoughnutChart.resize();
             }
             actualizarGraficos();
         }
-    });
+    }
 
-    inicializarGraficos();
-    actualizarTablaPacientes();
-    actualizarContadoresEstadisticas();
-    actualizarGraficos();
-    actualizarContadorLimite();
+    // --- LÓGICA DE INICIALIZACIÓN PRINCIPAL ---
+    checkSession();
 });
