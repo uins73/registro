@@ -1,43 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias a los elementos del DOM para el Login/Registro ---
-    const loginSection = document.getElementById('login-section');
-    const appContent = document.getElementById('app-content');
-    const authTitle = document.getElementById('authTitle'); // Nuevo
-    const loginForm = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginError = document.getElementById('loginError');
-    const btnLogout = document.getElementById('btnLogout');
+    // --- Referencias a los elementos del DOM de la aplicación (NO LOGIN/REGISTRO) ---
+    const appContent = document.getElementById('app-content'); // Ahora no necesita d-none
+    // Eliminar: loginSection, authTitle, loginForm, usernameInput, passwordInput, loginError, btnLogout
+    // Eliminar: registerForm, registerUsernameInput, registerPasswordInput, confirmPasswordInput, registerError, registerSuccess, showRegisterLink, showLoginLink
 
-    // Referencias para el Registro (Nuevas)
-    const registerForm = document.getElementById('registerForm');
-    const registerUsernameInput = document.getElementById('registerUsername');
-    const registerPasswordInput = document.getElementById('registerPassword');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const registerError = document.getElementById('registerError');
-    const registerSuccess = document.getElementById('registerSuccess');
-    const showRegisterLink = document.getElementById('showRegisterLink');
-    const showLoginLink = document.getElementById('showLoginLink');
-
-    // --- Credenciales de ejemplo (Para un sistema real, esto sería validado en un servidor) ---
-    // Removido USERNAME y PASSWORD fijos. Ahora se cargarán desde localStorage.
-    let users = JSON.parse(localStorage.getItem('users')) || [{ username: 'admin', password: 'password123' }];
-    // Si no hay usuarios, agregamos el predeterminado.
-
-    // Declarar las variables que se referencian en showApp() para que tengan un ámbito global en DOMContentLoaded
-    let pacienteForm;
-    let tablaPacientesBody;
-    let countCritico;
-    let countUrgente;
-    let countModerado;
-    let countLeve;
-    let limitePacientesInput;
-    let totalPacientesActualesSpan;
-    let limiteMostradoSpan;
-    let btnRegistrarPaciente;
-    let limiteHospital;
-    let gravedadDoughnutChart;
+    // Ahora estas variables se pueden declarar y asignar directamente, ya que app-content siempre es visible
+    const pacienteForm = document.getElementById('pacienteForm');
+    const tablaPacientesBody = document.getElementById('tablaPacientesBody');
+    const countCritico = document.getElementById('countCritico');
+    const countUrgente = document.getElementById('countUrgente');
+    const countModerado = document.getElementById('countModerado');
+    const countLeve = document.getElementById('countLeve');
+    const limitePacientesInput = document.getElementById('limitePacientes');
+    const totalPacientesActualesSpan = document.getElementById('totalPacientesActuales');
+    const limiteMostradoSpan = document.getElementById('limiteMostrado');
+    const btnRegistrarPaciente = document.getElementById('btnRegistrarPaciente');
     const myTab = document.getElementById('myTab');
+
+    let limiteHospital = parseInt(limitePacientesInput.value);
+    let gravedadDoughnutChart; // Se mantiene, pero se inicializa directamente
+
+    // Eliminar: USERNAME, PASSWORD, y la variable `users`
 
     class Paciente {
         constructor(nombre, edad, genero, documento, sintomas, gravedad, tratamiento, medicamentos, examenes) {
@@ -63,247 +46,47 @@ document.addEventListener('DOMContentLoaded', () => {
         new Paciente('Ana López', 45, 'Mujer', '55667788', 'Dolor abdominal agudo', 'moderado', 'Dieta blanda, hidratación', 'Buscapina', 'Ecografía abdominal')
     ];
 
-    // --- Funciones para verificar el estado de la sesión y mostrar/ocultar secciones ---
-    function checkSession() {
-        const loggedIn = localStorage.getItem('loggedIn');
-        if (loggedIn === 'true') {
-            showApp();
-        } else {
-            showLogin();
-        }
+    // --- ELIMINAR TODAS LAS FUNCIONES Y LISTENERS RELACIONADOS CON EL LOGIN ---
+    // Eliminar: checkSession(), showApp(), showLogin()
+    // Eliminar: loginForm.addEventListener(), btnLogout.addEventListener()
+    // Eliminar: showRegisterLink.addEventListener(), showLoginLink.addEventListener()
+    // Eliminar: registerForm.addEventListener()
+
+    // --- Cargar pacientes o usar predeterminados (AHORA ESTA ES LA INICIALIZACIÓN DIRECTA) ---
+    const pacientesGuardados = JSON.parse(localStorage.getItem('pacientes'));
+    if (pacientesGuardados && pacientesGuardados.length > 0) {
+        pacientes = pacientesGuardados;
+    } else {
+        pacientes = [...pacientesPredeterminados];
     }
 
-    function showApp() {
-        loginSection.classList.add('d-none');
-        appContent.classList.remove('d-none');
+    // --- LÓGICA DE INICIALIZACIÓN DE LA APLICACIÓN (AHORA SE EJECUTA DIRECTAMENTE) ---
+    actualizarTablaPacientes();
+    actualizarContadoresEstadisticas();
+    actualizarContadorLimite();
 
-        // --- ESTO ES CRUCIAL: OBTENER LAS REFERENCIAS DEL DOM AQUÍ ---
-        pacienteForm = document.getElementById('pacienteForm');
-        tablaPacientesBody = document.getElementById('tablaPacientesBody');
-        countCritico = document.getElementById('countCritico');
-        countUrgente = document.getElementById('countUrgente');
-        countModerado = document.getElementById('countModerado');
-        countLeve = document.getElementById('countLeve');
-        limitePacientesInput = document.getElementById('limitePacientes');
-        totalPacientesActualesSpan = document.getElementById('totalPacientesActuales');
-        limiteMostradoSpan = document.getElementById('limiteMostrado');
-        btnRegistrarPaciente = document.getElementById('btnRegistrarPaciente');
-
-        limiteHospital = parseInt(limitePacientesInput.value);
-
-        // --- Cargar pacientes o usar predeterminados ---
-        const pacientesGuardados = JSON.parse(localStorage.getItem('pacientes'));
-        if (pacientesGuardados && pacientesGuardados.length > 0) {
-            pacientes = pacientesGuardados;
-        } else {
-            pacientes = [...pacientesPredeterminados];
-        }
-
-        // --- LÓGICA DE INICIALIZACIÓN DE LA APLICACIÓN ---
-        actualizarTablaPacientes();
-        actualizarContadoresEstadisticas();
-        actualizarContadorLimite();
-
-        if (!gravedadDoughnutChart) {
-            inicializarGraficos();
-        }
-        actualizarGraficos();
-
-        const registroTab = new bootstrap.Tab(document.getElementById('registro-tab'));
-        registroTab.show();
-
-        // --- RE-ADJUNTAR LISTENERS (para la app principal) ---
-        // Se aseguran de que los listeners estén en los elementos correctos después de obtener las referencias
-        pacienteForm.querySelectorAll('input, select, textarea').forEach(input => {
-            input.removeEventListener('input', handleValidation);
-            input.addEventListener('input', handleValidation);
-        });
-        limitePacientesInput.removeEventListener('input', handleLimiteChange);
-        limitePacientesInput.addEventListener('input', handleLimiteChange);
-        pacienteForm.removeEventListener('submit', handleSubmitForm);
-        pacienteForm.addEventListener('submit', handleSubmitForm);
-        tablaPacientesBody.removeEventListener('click', handleDeletePaciente);
-        tablaPacientesBody.addEventListener('click', handleDeletePaciente);
-        tablaPacientesBody.removeEventListener('click', handleDownloadPaciente);
-        tablaPacientesBody.addEventListener('click', handleDownloadPaciente);
-        myTab.removeEventListener('shown.bs.tab', handleTabShow);
-        myTab.addEventListener('shown.bs.tab', handleTabShow);
+    // Inicializar gráficos aquí, ya que la aplicación siempre está visible
+    if (!gravedadDoughnutChart) {
+        inicializarGraficos();
     }
+    actualizarGraficos();
 
-    function showLogin() {
-        loginSection.classList.remove('d-none');
-        appContent.classList.add('d-none');
-        localStorage.removeItem('loggedIn');
-        // Limpiar campos de login
-        usernameInput.value = '';
-        passwordInput.value = '';
-        loginError.classList.add('d-none');
-        // Asegurarse de que el formulario de login esté visible al salir
-        loginForm.classList.remove('d-none');
-        registerForm.classList.add('d-none');
-        authTitle.textContent = 'Iniciar Sesión';
-        // Limpiar campos de registro
-        registerUsernameInput.value = '';
-        registerPasswordInput.value = '';
-        confirmPasswordInput.value = '';
-        registerError.classList.add('d-none');
-        registerSuccess.classList.add('d-none');
-        // Guardar pacientes antes de cerrar sesión
-        localStorage.setItem('pacientes', JSON.stringify(pacientes));
-    }
+    const registroTab = new bootstrap.Tab(document.getElementById('registro-tab'));
+    registroTab.show();
 
-    // --- Manejo del Login ---
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-
-        // Validar contra la lista de usuarios
-        const userFound = users.find(user => user.username === username && user.password === password);
-
-        if (userFound) {
-            localStorage.setItem('loggedIn', 'true');
-            showApp();
-        } else {
-            loginError.classList.remove('d-none');
-        }
+    // --- ADJUNTAR LISTENERS (para la app principal) ---
+    // NO ES NECESARIO re-adjuntarlos dentro de una función showApp()
+    pacienteForm.querySelectorAll('input, select, textarea').forEach(input => {
+        input.addEventListener('input', handleValidation);
     });
+    limitePacientesInput.addEventListener('input', handleLimiteChange);
+    pacienteForm.addEventListener('submit', handleSubmitForm);
+    tablaPacientesBody.addEventListener('click', handleDeletePaciente);
+    tablaPacientesBody.addEventListener('click', handleDownloadPaciente);
+    myTab.addEventListener('shown.bs.tab', handleTabShow);
 
-    // --- Manejo del Logout ---
-    btnLogout.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres cerrar la sesión?')) {
-            showLogin();
-        }
-    });
 
-    // --- Lógica para alternar entre formularios de Login y Registro ---
-    showRegisterLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        loginForm.classList.add('d-none');
-        registerForm.classList.remove('d-none');
-        authTitle.textContent = 'Crear Cuenta';
-        loginError.classList.add('d-none'); // Ocultar errores de login al cambiar
-        registerSuccess.classList.add('d-none'); // Ocultar éxito si se mostró antes
-        registerError.classList.add('d-none'); // Ocultar errores de registro
-        // Limpiar campos de login al cambiar
-        usernameInput.value = '';
-        passwordInput.value = '';
-        // Resetear validación visual de campos de registro
-        registerUsernameInput.classList.remove('is-valid', 'is-invalid');
-        registerPasswordInput.classList.remove('is-valid', 'is-invalid');
-        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
-    });
-
-    showLoginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        registerForm.classList.add('d-none');
-        loginForm.classList.remove('d-none');
-        authTitle.textContent = 'Iniciar Sesión';
-        registerError.classList.add('d-none'); // Ocultar errores de registro al cambiar
-        registerSuccess.classList.add('d-none'); // Ocultar éxito si se mostró antes
-        loginError.classList.add('d-none'); // Ocultar errores de login
-        // Limpiar campos de registro al cambiar
-        registerUsernameInput.value = '';
-        registerPasswordInput.value = '';
-        confirmPasswordInput.value = '';
-        // Resetear validación visual de campos de login
-        usernameInput.classList.remove('is-valid', 'is-invalid');
-        passwordInput.classList.remove('is-valid', 'is-invalid');
-    });
-
-    // --- Manejo del Registro ---
-    registerForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newUsername = registerUsernameInput.value.trim();
-        const newPassword = registerPasswordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
-
-        // Limpiar mensajes anteriores
-        registerError.classList.add('d-none');
-        registerSuccess.classList.add('d-none');
-
-        // Validaciones del formulario de registro
-        let isValidRegisterForm = true;
-
-        const validateRegisterUsername = (val) => val.length >= 3 && !/\s/.test(val); // No espacios
-        const validateRegisterPassword = (val) => val.length >= 6;
-        const validateConfirmPassword = (pass1, pass2) => pass1 === pass2;
-
-        isValidRegisterForm = validarCampo(registerUsernameInput, validateRegisterUsername) && isValidRegisterForm;
-        isValidRegisterForm = validarCampo(registerPasswordInput, validateRegisterPassword) && isValidRegisterForm;
-        
-        // Validación específica para confirmar contraseña
-        if (!validateConfirmPassword(newPassword, confirmPassword)) {
-            confirmPasswordInput.classList.add('is-invalid');
-            confirmPasswordInput.classList.remove('is-valid');
-            isValidRegisterForm = false;
-        } else {
-            confirmPasswordInput.classList.remove('is-invalid');
-            confirmPasswordInput.classList.add('is-valid');
-        }
-
-        if (!isValidRegisterForm) {
-            registerError.textContent = 'Por favor, complete todos los campos de registro correctamente.';
-            registerError.classList.remove('d-none');
-            return;
-        }
-
-        // Verificar si el usuario ya existe
-        const userExists = users.some(user => user.username === newUsername);
-        if (userExists) {
-            registerError.textContent = 'El usuario ya existe. Por favor, elija otro nombre de usuario.';
-            registerError.classList.remove('d-none');
-            return;
-        }
-
-        // Si todo es válido, registrar nuevo usuario
-        users.push({ username: newUsername, password: newPassword });
-        localStorage.setItem('users', JSON.stringify(users)); // Guardar nuevos usuarios
-        registerSuccess.classList.remove('d-none'); // Mostrar mensaje de éxito
-        registerError.classList.add('d-none');
-
-        // Opcional: limpiar campos después del registro exitoso
-        registerUsernameInput.value = '';
-        registerPasswordInput.value = '';
-        confirmPasswordInput.value = '';
-        // Resetear la validación visual
-        registerUsernameInput.classList.remove('is-valid', 'is-invalid');
-        registerPasswordInput.classList.remove('is-valid', 'is-invalid');
-        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
-
-        // Opcional: cambiar automáticamente a la pantalla de login después de un registro exitoso
-        setTimeout(() => {
-            showLoginLink.click();
-        }, 2000); // Cambia a login después de 2 segundos
-    });
-
-    // --- Funciones de Validación (Se mantienen iguales) ---
-    function handleValidation() {
-        switch (this.id) {
-            case 'nombre': validarCampo(this, validarNombre); break;
-            case 'edad': validarCampo(this, validarEdad); break;
-            case 'genero': validarCampo(this, validarGenero); break;
-            case 'documento': validarCampo(this, validarDocumento); break;
-            case 'sintomas': validarCampo(this, validarSintomas); break;
-            case 'gravedad': validarCampo(this, validarGravedad); break;
-            case 'tratamiento': validarCampo(this, validarTratamiento); break;
-            case 'medicamentos': validarCampo(this, validarMedicamentos); break;
-            case 'examenes': validarCampo(this, validarExamenes); break;
-            // Nuevas validaciones para el formulario de registro
-            case 'registerUsername': validarCampo(this, (val) => val.length >= 3 && !/\s/.test(val)); break;
-            case 'registerPassword': validarCampo(this, (val) => val.length >= 6); break;
-            case 'confirmPassword':
-                const regPass = registerPasswordInput.value;
-                const confPass = this.value;
-                validarCampo(this, (val) => regPass === confPass);
-                break;
-        }
-    }
-    // ... (el resto de tus funciones: validarCampo, mostrarAlerta, actualizarContadorLimite, etc.) ...
-    // Asegúrate de que todas las funciones que definiste previamente estén aquí,
-    // incluyendo las funciones de descarga y las de los gráficos.
-    // Solo estoy mostrando los cambios relevantes para el login/registro.
-
+    // --- Funciones de Validación (sin cambios, excepto eliminar validaciones de registro) ---
     const validarCampo = (inputElement, validationFn) => {
         const value = inputElement.value.trim();
         const isValid = validationFn(value);
@@ -325,6 +108,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const validarTratamiento = (valor) => valor.length > 0;
     const validarMedicamentos = (valor) => valor.length > 0;
     const validarExamenes = (valor) => valor !== '';
+
+    function handleValidation() {
+        switch (this.id) {
+            case 'nombre': validarCampo(this, validarNombre); break;
+            case 'edad': validarCampo(this, validarEdad); break;
+            case 'genero': validarCampo(this, validarGenero); break;
+            case 'documento': validarCampo(this, validarDocumento); break;
+            case 'sintomas': validarCampo(this, validarSintomas); break;
+            case 'gravedad': validarCampo(this, validarGravedad); break;
+            case 'tratamiento': validarCampo(this, validarTratamiento); break;
+            case 'medicamentos': validarCampo(this, validarMedicamentos); break;
+            case 'examenes': validarCampo(this, validarExamenes); break;
+            // ELIMINAR: cases para 'registerUsername', 'registerPassword', 'confirmPassword'
+        }
+    }
 
     function mostrarAlerta(mensaje, tipo = 'info') {
         const alertPlaceholder = document.createElement('div');
@@ -490,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- FUNCIÓN: Descargar paciente en formato TXT (sin cambios) ---
     function descargarPaciente(paciente) {
         let pacienteTxt = `--- Información del Paciente ---\n\n`;
         pacienteTxt += `ID: ${paciente.id}\n`;
@@ -518,7 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mostrarAlerta(`Información de ${paciente.nombre} descargada en formato TXT.`, 'info');
     }
 
-    // --- EVENT LISTENER: Manejar clic en botón de descarga (sin cambios) ---
     function handleDownloadPaciente(e) {
         if (e.target.classList.contains('descargar-paciente')) {
             const pacienteId = parseFloat(e.target.dataset.id);
@@ -647,6 +443,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- LÓGICA DE INICIALIZACIÓN PRINCIPAL ---
-    checkSession();
+    // --- NO HAY LLAMADA A checkSession() AQUÍ. LA APP SE INICIALIZA DIRECTAMENTE ---
 });
