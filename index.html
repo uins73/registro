@@ -9,60 +9,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="login-section" class="d-flex align-items-center justify-content-center vh-100 bg-light">
-        <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
-            <h2 class="card-title text-center mb-4" id="authTitle">Iniciar Sesión</h2>
-
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Usuario</label>
-                    <input type="text" class="form-control" id="username" required>
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Acceder</button>
-                <div id="loginError" class="alert alert-danger mt-3 d-none" role="alert">
-                    Usuario o contraseña incorrectos.
-                </div>
-                <p class="text-center mt-3">¿No tienes una cuenta? <a href="#" id="showRegisterLink">Crear Cuenta</a></p>
-            </form>
-
-            <form id="registerForm" class="d-none">
-                <div class="mb-3">
-                    <label for="registerUsername" class="form-label">Nuevo Usuario</label>
-                    <input type="text" class="form-control" id="registerUsername" required>
-                    <div class="invalid-feedback">El usuario debe tener al menos 3 caracteres y no contener espacios.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="registerPassword" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" id="registerPassword" required>
-                    <div class="invalid-feedback">La contraseña debe tener al menos 6 caracteres.</div>
-                </div>
-                <div class="mb-4">
-                    <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                    <input type="password" class="form-control" id="confirmPassword" required>
-                    <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Registrarse</button>
-                <div id="registerError" class="alert alert-danger mt-3 d-none" role="alert">
-                    El usuario ya existe o hubo un error.
-                </div>
-                <div id="registerSuccess" class="alert alert-success mt-3 d-none" role="alert">
-                    ¡Cuenta creada exitosamente! Puedes iniciar sesión.
-                </div>
-                <p class="text-center mt-3">¿Ya tienes una cuenta? <a href="#" id="showLoginLink">Iniciar Sesión</a></p>
-            </form>
-        </div>
-    </div>
-
-    <div id="app-content" class="d-none">
-        <div class="container-fluid">
+    <div id="app-content"> <div class="container-fluid">
             <header class="bg-primary text-white text-center py-3 mb-4 d-flex align-items-center justify-content-between">
                 <h1 class="display-6 m-0 ms-3">Sistema de Registro de Pacientes en Emergencias</h1>
-                <button class="btn btn-danger me-3" id="btnLogout">Cerrar Sesión</button>
-            </header>
+                </header>
 
             <main class="container">
                 <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
